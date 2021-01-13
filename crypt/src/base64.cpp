@@ -78,5 +78,12 @@ void Base64::b64Encode(vector<unsigned char> &buf, string &out) const {
 }
 
 int Base64::b64Decode(string &str, vector<unsigned char> &out) const {
+    auto strLen = str.size();
+    auto group = strLen / 4;
+    auto left = strLen % 4;
+
+    if (left == 1) {
+        return -1;
+    }
     return 0;
 }
