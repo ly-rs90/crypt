@@ -18,6 +18,16 @@ int main() {
     Base64 base64;
     string out;
     base64.b64Encode(buf, out);
-    cout << out << endl;
+    cout << "Hello,World: " << out << endl;
+
+    string s("5L2g5aW977yM5LiW55WM");
+    vector<unsigned char> out1;
+
+    base64.b64Decode(s, out1);
+    string s1;
+    for (auto &c: out1) {
+        s1.push_back(c);
+    }
+    cout << s << ": " << s1 << endl;
     return 0;
 }

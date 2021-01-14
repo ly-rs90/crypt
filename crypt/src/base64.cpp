@@ -6,36 +6,35 @@
 
 
 Base64::Base64() {
-    mB64Words = new char[64];
-    for (auto i = 0; i < 26; i++) {
-        mB64Words[i] = 'A' + i;
-    }
-    for (auto i = 0; i < 26; i++) {
-        mB64Words[i+26] = 'a' + i;
-    }
-    for (auto i = 0; i < 10; i++) {
-        mB64Words[i+52] = '0' + i;
-    }
-    mB64Words[62] = '+';
-    mB64Words[63] = '/';
+    static char b64Words[] = {
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+            'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+            'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+            'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+            'w', 'x', 'y', 'z', '0', '1', '2', '3',
+            '4', '5', '6', '7', '8', '9', '+', '/'
+    };
+    mB64Words = b64Words;
 
-    auto v = 0;
-    for (auto i = 'A'; i <= 'Z'; i++, v++) {
-        mB64Map[i] = static_cast<char>(v);
+    static bool initTable = false;
+    static unsigned char b64Table[256];
+    mB64Table = b64Table;
+
+    if (!initTable) {
+        for (auto & i : b64Table) {
+            i = -1;
+        }
+
+        for (auto i = 0; i < 64; i++) {
+            b64Table[b64Words[i]] = i;
+        }
+        initTable = true;
     }
-    for (auto i = 'a'; i <= 'z'; i++, v++) {
-        mB64Map[i] = static_cast<char>(v);
-    }
-    for (auto i = '0'; i <= '9'; i++, v++) {
-        mB64Map[i] = static_cast<char>(v);
-    }
-    mB64Map['+'] = static_cast<char>(62);
-    mB64Map['/'] = static_cast<char>(63);
 }
 
-Base64::~Base64() {
-    delete []mB64Words;
-}
+Base64::~Base64() = default;
 
 void Base64::b64Encode(vector<unsigned char> &buf, string &out) const {
     auto bufLen = buf.size();
@@ -77,13 +76,26 @@ void Base64::b64Encode(vector<unsigned char> &buf, string &out) const {
     }
 }
 
-int Base64::b64Decode(string &str, vector<unsigned char> &out) const {
-    auto strLen = str.size();
-    auto group = strLen / 4;
-    auto left = strLen % 4;
+void Base64::b64Decode(string &str, vector<unsigned char> &out) const {
+    out.clear();
 
-    if (left == 1) {
-        return -1;
+    int temp = 0;
+    int bitLen = 0;
+
+    for (auto & c : str) {
+        if (c == '=' or mB64Table[c] == 0xff) break;
+        temp <<= 6;
+        bitLen += 6;
+        temp |= mB64Table[c];
+
+        while (bitLen >= 8) {
+            out.push_back(static_cast<char>(temp >> (bitLen - 8)));
+            bitLen -= 8;
+        }
     }
-    return 0;
+
+    while (bitLen >= 8) {
+        out.push_back(static_cast<char>(temp >> (bitLen - 8)));
+        bitLen -= 8;
+    }
 }

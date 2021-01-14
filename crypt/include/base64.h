@@ -14,13 +14,13 @@ using namespace std;
 class Base64 {
 private:
     char *mB64Words;
-    map<char, char> mB64Map;
+    unsigned char *mB64Table;
 public:
     explicit Base64();
     virtual ~Base64();
 
     void b64Encode(IN vector<unsigned char> &buf, OUT string &out) const;
-    int b64Decode(IN string &str, OUT vector<unsigned char> &out) const;
+    void b64Decode(IN string &str, OUT vector<unsigned char> &out) const;
 };
 
 #endif //CRYPT_BASE64_H
